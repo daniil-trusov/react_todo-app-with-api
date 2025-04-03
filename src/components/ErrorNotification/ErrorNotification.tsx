@@ -8,34 +8,33 @@ type Props = {
   clearError: () => void;
 };
 
-export const ErrorNotification: React.FC<Props> = React.memo(
-  ({ errorMessage, clearError }) => {
-    useEffect(() => {
-      const timerId = setTimeout(clearError, errorShowTime);
+export const ErrorNotification: React.FC<Props> = ({
+  errorMessage,
+  clearError,
+}) => {
+  useEffect(() => {
+    const timerId = setTimeout(clearError, errorShowTime);
 
-      return () => {
-        clearTimeout(timerId);
-      };
-    }, [errorMessage, clearError]);
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [errorMessage, clearError]);
 
-    return (
-      <div
-        data-cy="ErrorNotification"
-        className={classNames(
-          'notification is-danger is-light has-text-weight-normal',
-          { hidden: !errorMessage },
-        )}
-      >
-        <button
-          data-cy="HideErrorButton"
-          type="button"
-          className="delete"
-          onClick={clearError}
-        />
-        {errorMessage}
-      </div>
-    );
-  },
-);
-
-ErrorNotification.displayName = 'ErrorNotification';
+  return (
+    <div
+      data-cy="ErrorNotification"
+      className={classNames(
+        'notification is-danger is-light has-text-weight-normal',
+        { hidden: !errorMessage },
+      )}
+    >
+      <button
+        data-cy="HideErrorButton"
+        type="button"
+        className="delete"
+        onClick={clearError}
+      />
+      {errorMessage}
+    </div>
+  );
+};

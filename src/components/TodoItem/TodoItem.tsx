@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 
-import { Todo } from '../../types/Todo';
+import { Todo } from '../../types/Types';
 
 type Props = {
   todo: Todo;
@@ -19,10 +19,10 @@ export const TodoItem: React.FC<Props> = React.memo(
     const [isLoading, setIsLoading] = useState(false);
     const [todoTitle, setTodoTitle] = useState(todo.title);
 
-    const startTitleChange = useCallback(() => {
+    const startTitleChange = () => {
       setIsEdited(true);
       setTodoTitle(todo.title);
-    }, [todo.title]);
+    };
 
     const endTitleInput = useCallback(() => {
       setIsEdited(false);
@@ -44,7 +44,7 @@ export const TodoItem: React.FC<Props> = React.memo(
       return () => document.removeEventListener('keyup', handleEscapePress);
     }, [handleEscapePress]);
 
-    const handleTodoRemove = useCallback(async () => {
+    const handleTodoRemove = async () => {
       setIsLoading(true);
       if (onRemove) {
         try {
@@ -53,9 +53,9 @@ export const TodoItem: React.FC<Props> = React.memo(
           setIsLoading(false);
         }
       }
-    }, [onRemove]);
+    };
 
-    const handleTodoToggle = useCallback(async () => {
+    const handleTodoToggle = async () => {
       setIsLoading(true);
       if (onToggle) {
         try {
@@ -64,33 +64,32 @@ export const TodoItem: React.FC<Props> = React.memo(
           setIsLoading(false);
         }
       }
-    }, [onToggle]);
+    };
 
-    const handleTodoRenameSubmit = useCallback(
-      async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleTodoRenameSubmit = async (
+      event: React.FormEvent<HTMLFormElement>,
+    ) => {
+      event.preventDefault();
 
-        const titleToSubmit = todoTitle.trim();
+      const titleToSubmit = todoTitle.trim();
 
-        if (titleToSubmit === todo.title) {
+      if (titleToSubmit === todo.title) {
+        endTitleInput();
+
+        return;
+      }
+
+      setIsLoading(true);
+
+      if (onRename) {
+        try {
+          await onRename(titleToSubmit);
           endTitleInput();
-
-          return;
+        } finally {
+          setIsLoading(false);
         }
-
-        setIsLoading(true);
-
-        if (onRename) {
-          try {
-            await onRename(titleToSubmit);
-            endTitleInput();
-          } finally {
-            setIsLoading(false);
-          }
-        }
-      },
-      [endTitleInput, onRename, todo.title, todoTitle],
-    );
+      }
+    };
 
     const handleTitleInputChange = (
       event: React.ChangeEvent<HTMLInputElement>,

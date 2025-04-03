@@ -3,9 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as todoApi from './api/todos';
 
-import { Todo } from './types/Todo';
-import { FilterBy } from './types/FilterBy';
-import { ErrorType as ErrorType } from './types/ErrorType';
+import { Todo, FilterBy, ErrorType } from './types/Types';
 
 import { TodoAppHeader } from './components/TodoAppHeader';
 import { TodoList } from './components/TodoList';
@@ -19,7 +17,7 @@ function filterTodo(todos: Todo[], filterBy: FilterBy): Todo[] {
     case FilterBy.Completed:
       return todos.filter(todo => todo.completed);
     default:
-      return [...todos];
+      return todos;
   }
 }
 
@@ -52,26 +50,23 @@ export const App: React.FC = () => {
     loadTodos();
   }, [clearError, loadTodos]);
 
-  const addTodo = useCallback(
-    async (newTodoTitle: string): Promise<void> => {
-      clearError();
-      setTempTodoTitle(newTodoTitle);
+  const addTodo = async (newTodoTitle: string): Promise<void> => {
+    clearError();
+    setTempTodoTitle(newTodoTitle);
 
-      try {
-        const addedTodo = await todoApi.addTodo(newTodoTitle);
+    try {
+      const addedTodo = await todoApi.addTodo(newTodoTitle);
 
-        setTodos(currentTodos => [...currentTodos, addedTodo]);
-      } catch (error) {
-        setErrorMessage(ErrorType.TODO_ADD);
-        throw error;
-      } finally {
-        setTempTodoTitle('');
-      }
-    },
-    [clearError],
-  );
+      setTodos(currentTodos => [...currentTodos, addedTodo]);
+    } catch (error) {
+      setErrorMessage(ErrorType.TODO_ADD);
+      throw error;
+    } finally {
+      setTempTodoTitle('');
+    }
+  };
 
-  const deleteTodo = useCallback(async (idToDelete: number): Promise<void> => {
+  const deleteTodo = async (idToDelete: number): Promise<void> => {
     try {
       await todoApi.deleteTodo(idToDelete);
       setTodos(currentTodos =>
@@ -81,9 +76,9 @@ export const App: React.FC = () => {
       setErrorMessage(ErrorType.TODO_DELETE);
       throw error;
     }
-  }, []);
+  };
 
-  const deleteAllCompleted = useCallback(async () => {
+  const deleteAllCompleted = async () => {
     if (processings.length > 0) {
       setErrorMessage(ErrorType.TODO_PROCESSED);
 
@@ -103,86 +98,75 @@ export const App: React.FC = () => {
     } finally {
       setProcessings([]);
     }
-  }, [deleteTodo, processings.length, todos]);
+  };
 
-  const updateTodoAfterResponse = useCallback(
-    async (promise: Promise<Todo>): Promise<void> => {
-      try {
-        const updatedTodo = await promise;
+  const updateTodoAfterResponse = async (
+    promise: Promise<Todo>,
+  ): Promise<void> => {
+    try {
+      const updatedTodo = await promise;
 
-        setTodos(currentTodos => {
-          const updatedTodos = [...currentTodos];
-          const todoId = currentTodos.findIndex(
-            todo => todo.id === updatedTodo.id,
-          );
-
-          updatedTodos.splice(todoId, 1, updatedTodo);
-
-          return updatedTodos;
-        });
-      } catch (error) {
-        setErrorMessage(ErrorType.TODO_UPDATE);
-        throw error;
-      }
-    },
-    [],
-  );
-
-  const renameTodo = useCallback(
-    (id: number, updatedTitle: string): Promise<void> => {
-      if (!updatedTitle) {
-        return deleteTodo(id);
-      }
-
-      const updatePromise = todoApi.updateTodo(id, updatedTitle);
-
-      return updateTodoAfterResponse(updatePromise);
-    },
-    [deleteTodo, updateTodoAfterResponse],
-  );
-
-  const toggleTodo = useCallback(
-    (id: number, completed: boolean): Promise<void> => {
-      const updatePromise = todoApi.toggleTodo(id, completed);
-
-      return updateTodoAfterResponse(updatePromise);
-    },
-    [updateTodoAfterResponse],
-  );
-
-  const toggleAll = useCallback(
-    async (completeAll: boolean) => {
-      if (processings.length > 0) {
-        setErrorMessage(ErrorType.TODO_PROCESSED);
-
-        return;
-      }
-
-      const todosToToggle = todos.filter(
-        todo => todo.completed !== completeAll,
-      );
-
-      setProcessings(todos.map(todo => todo.id));
-
-      const togglePromises = todosToToggle.map(todo =>
-        todoApi.toggleTodo(todo.id, todo.completed),
-      );
-
-      try {
-        const updatedTodos = await Promise.all(togglePromises);
-
-        setTodos(currentTodos =>
-          currentTodos.map(
-            todo =>
-              updatedTodos.find(updated => updated.id === todo.id) || todo,
-          ),
+      setTodos(currentTodos => {
+        const updatedTodos = [...currentTodos];
+        const todoId = currentTodos.findIndex(
+          todo => todo.id === updatedTodo.id,
         );
-      } finally {
-        setProcessings([]);
-      }
-    },
-    [processings.length, todos],
-  );
+
+        updatedTodos.splice(todoId, 1, updatedTodo);
+
+        return updatedTodos;
+      });
+    } catch (error) {
+      setErrorMessage(ErrorType.TODO_UPDATE);
+      throw error;
+    }
+  };
+
+  const renameTodo = (id: number, updatedTitle: string): Promise<void> => {
+    if (!updatedTitle) {
+      return deleteTodo(id);
+    }
+
+    const updatePromise = todoApi.updateTodo(id, updatedTitle);
+
+    return updateTodoAfterResponse(updatePromise);
+  };
+
+  const toggleTodo = (id: number, completed: boolean): Promise<void> => {
+    const updatePromise = todoApi.toggleTodo(id, completed);
+
+    return updateTodoAfterResponse(updatePromise);
+  };
+
+  const toggleAll = async (completeAll: boolean) => {
+    if (processings.length > 0) {
+      setErrorMessage(ErrorType.TODO_PROCESSED);
+
+      return;
+    }
+
+    const todosToToggle = todos.filter(todo => todo.completed !== completeAll);
+
+    setProcessings(todos.map(todo => todo.id));
+
+    const togglePromises = todosToToggle.map(todo =>
+      todoApi.toggleTodo(todo.id, todo.completed),
+    );
+
+    try {
+      const updatedTodos = await Promise.all(togglePromises);
+
+      setTodos(currentTodos =>
+        currentTodos.map(
+          todo =>
+            updatedTodos.find((updated: Todo) => updated.id === todo.id) ||
+            todo,
+        ),
+      );
+    } finally {
+      setProcessings([]);
+    }
+  };
 
   const filteredTodos: Todo[] = useMemo(
     () => filterTodo(todos, filterBy),
