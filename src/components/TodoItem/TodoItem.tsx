@@ -38,12 +38,6 @@ export const TodoItem: React.FC<Props> = React.memo(
       [endTitleInput],
     );
 
-    useEffect(() => {
-      document.addEventListener('keyup', handleEscapePress);
-
-      return () => document.removeEventListener('keyup', handleEscapePress);
-    }, [handleEscapePress]);
-
     const handleTodoRemove = async () => {
       setIsLoading(true);
       if (onRemove) {
@@ -96,6 +90,12 @@ export const TodoItem: React.FC<Props> = React.memo(
     ) => {
       setTodoTitle(event.target.value);
     };
+
+    useEffect(() => {
+      document.addEventListener('keyup', handleEscapePress);
+
+      return () => document.removeEventListener('keyup', handleEscapePress);
+    }, [handleEscapePress]);
 
     return (
       <div

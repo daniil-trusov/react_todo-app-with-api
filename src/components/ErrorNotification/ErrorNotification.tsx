@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import cn from 'classnames';
 import React, { useEffect } from 'react';
 
 const errorShowTime: number = 3000; //3
@@ -23,10 +23,9 @@ export const ErrorNotification: React.FC<Props> = ({
   return (
     <div
       data-cy="ErrorNotification"
-      className={classNames(
-        'notification is-danger is-light has-text-weight-normal',
-        { hidden: !errorMessage },
-      )}
+      className={cn('notification is-danger is-light has-text-weight-normal', {
+        hidden: !errorMessage,
+      })}
     >
       <button
         data-cy="HideErrorButton"

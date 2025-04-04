@@ -46,10 +46,6 @@ export const App: React.FC = () => {
     }
   }, [clearError]);
 
-  useEffect(() => {
-    loadTodos();
-  }, [clearError, loadTodos]);
-
   const addTodo = async (newTodoTitle: string): Promise<void> => {
     clearError();
     setTempTodoTitle(newTodoTitle);
@@ -172,6 +168,10 @@ export const App: React.FC = () => {
     () => filterTodo(todos, filterBy),
     [todos, filterBy],
   );
+
+  useEffect(() => {
+    loadTodos();
+  }, [clearError, loadTodos]);
 
   return (
     <div className="todoapp">

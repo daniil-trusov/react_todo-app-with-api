@@ -22,10 +22,6 @@ export const TodoAppHeader: React.FC<Props> = ({
 
   const focusOnInput = useCallback(() => inputRef.current?.focus(), []);
 
-  useEffect(() => {
-    focusOnInput();
-  }, [todosLength, isSubmitting, focusOnInput]);
-
   const toggleAll = () => onToggleAll(!hasAllCompleted);
 
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +48,10 @@ export const TodoAppHeader: React.FC<Props> = ({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    focusOnInput();
+  }, [todosLength, isSubmitting, focusOnInput]);
 
   return (
     <header className="todoapp__header">
