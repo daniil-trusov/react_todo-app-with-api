@@ -31,21 +31,6 @@ export const App: React.FC = () => {
 
   const clearError = useCallback(() => setErrorMessage(ErrorType.NONE), []);
 
-  const loadTodos = useCallback(async () => {
-    clearError();
-    setIsLoading(true);
-
-    try {
-      const todosFromserver = await todoApi.getTodos();
-
-      setTodos(todosFromserver);
-    } catch (error) {
-      setErrorMessage(ErrorType.TODO_LOAD);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clearError]);
-
   const addTodo = async (newTodoTitle: string): Promise<void> => {
     clearError();
     setTempTodoTitle(newTodoTitle);
@@ -170,8 +155,14 @@ export const App: React.FC = () => {
   );
 
   useEffect(() => {
-    loadTodos();
-  }, [clearError, loadTodos]);
+    clearError();
+    setIsLoading(true);
+    todoApi
+      .getTodos()
+      .then(setTodos)
+      .catch(() => setErrorMessage(ErrorType.TODO_LOAD))
+      .finally(() => setIsLoading(false));
+  }, [clearError]);
 
   return (
     <div className="todoapp">
